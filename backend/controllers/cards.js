@@ -44,9 +44,24 @@ module.exports.createCard = (req, res) => {
     });
 };
 
-module.exports.deleteCard = (req, res) => Card.findByIdAndRemove(req.params.id)
-  .then((card) => res.send({ data: card }))
-  .catch((err) => res.status(500).send({ message: err.message }));
+module.exports.deleteCard = (req, res) =>{
+  if (mongoose.Types.ObjectId.isValid(req.params.id)) {
+    Card.findById(req.params.id)
+    .then((card) => {
+      const ownerId = card.owner.toString();
+      if(req.user._id ==ownerId) {
+        Card.findByIdAndRemove(req.params.id)
+        .then((card) => res.send({ data: card }))
+        .catch((err) => res.status(500).send({ message: err.message }));
+      } else {
+        res.status(403).send({ message: 'Can\'t delete other users cards' })
+      }
+    })
+    }    else {
+      // bad request
+      res.status(400).send({ message: 'Please provide correct id' });
+    }
+}
 
 module.exports.likeCard = (req, res) => Card.findByIdAndUpdate(
   req.params.id,

@@ -7,6 +7,7 @@ const cards = require('./routes/cards');
 const users = require('./routes/users');
 const {login} = require('./controllers/login')
 const {createUser} = require('./controllers/users');
+const auth = require('./middlewares/auth');
 
 const { PORT = 3000 } = process.env;
 
@@ -22,17 +23,11 @@ mongoose
     app.use(bodyParser.urlencoded({ extended: true }));
     app.use(helmet());
 
-    app.use((req, res, next) => {
-      req.user = {
-        _id: '62af131d778f0ca74cbe09b4', // paste the _id of the test user created in the previous step
-      };
-      next();
-    });
-
-    app.use('/users', users);
-    app.use('/cards', cards);
     app.post('/signin', login);
     app.post('/signup', createUser);
+
+    app.use('/users', auth, users);
+    app.use('/cards', auth, cards);
 
     app.get('*', (req, res) => {
       res.status(404).send({ message: 'Requested resource not found' });

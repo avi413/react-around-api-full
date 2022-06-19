@@ -40,6 +40,20 @@ module.exports.getUser = (req, res) => {
   return res.status(400).send({ message: 'Please provide correct id' });
 };
 
+module.exports.getMe = (req, res) => {
+    return (
+      User.findById(req.user._id)
+        // return the found data to the user
+        .then((user) => {
+          if (!Object.keys(user).length) {
+            res.status(404).send({ message: 'No result found' });
+          }
+          res.send({ data: user });
+        })
+        .catch((err) => res.status(500).send({ message: err.message }))
+    );
+};
+
 module.exports.createUser = (req, res) => {
   const { name, about, avatar, email, password } = req.body;
   bcrypt.hash(password, 10)
