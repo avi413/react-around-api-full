@@ -7,7 +7,7 @@ const jwt = require('jsonwebtoken');
 module.exports.login = (req, res) => {
   const { email, password } = req.body;
 
-  User.findOne({ email })
+  User.findOne({ email }).select('+password')
     .then((user) => {
       if (!user) {
           return res.status(401).send({ message: 'Incorrect email or password' });
