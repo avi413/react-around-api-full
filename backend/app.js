@@ -1,9 +1,12 @@
+require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const helmet = require('helmet');
 const bodyParser = require('body-parser');
 const cards = require('./routes/cards');
 const users = require('./routes/users');
+const {login} = require('./controllers/login')
+const {createUser} = require('./controllers/users');
 
 const { PORT = 3000 } = process.env;
 
@@ -21,13 +24,15 @@ mongoose
 
     app.use((req, res, next) => {
       req.user = {
-        _id: '628e9bdc6e008305115bb12f', // paste the _id of the test user created in the previous step
+        _id: '62af131d778f0ca74cbe09b4', // paste the _id of the test user created in the previous step
       };
       next();
     });
 
     app.use('/users', users);
     app.use('/cards', cards);
+    app.post('/signin', login);
+    app.post('/signup', createUser);
 
     app.get('*', (req, res) => {
       res.status(404).send({ message: 'Requested resource not found' });
