@@ -1,32 +1,33 @@
 const mongoose = require('mongoose');
 const Card = require('../models/card');
+const err = require('../middlewares/errors/errors');
 
-module.exports.getCards = (req, res) => {
+module.exports.getCards = (req, res, next) => {
   Card.find({})
     // return the found data to the card
     .then((card) => {
       if (!Object.keys(card).length) {
-        return res.status(404).send({ message: 'No result found' });
+        throw new err.NotFoundError('No result found');
       }
       return res.send({ data: card });
     })
     // if the record was not found, display an error message
-    .catch((err) => res.status(500).send({ message: err.message }));
+    .catch(next);
 };
 
-module.exports.getCard = (req, res) => {
+module.exports.getCard = (req, res, next) => {
   if (mongoose.Types.ObjectId.isValid(req.params.id)) {
     Card.findById(req.params.id)
       .then((card) => {
         // if the record was not found, display an error message
-        if (!card) return res.status(404).send({ message: 'No result found' });
+        if (!card)  throw new err.NotFoundError('No result found');
         // return the found data to the card
         return res.send({ data: card });
       })
-      .catch((err) => res.status(500).send({ message: err }));
+      .catch(next);
   } else {
     // bad request
-    res.status(400).send({ message: 'Please provide correct id' });
+    throw new err.BadRequest('Please provide correct id');
   }
 };
 
@@ -38,13 +39,14 @@ module.exports.createCard = (req, res) => {
     .catch((err) => {
       if (err.name === 'ValidationError') {
         res.status(400).send({ message: err.message });
+        throw new err.BadRequest( err.message );
       } else {
-        res.status(500).send({ message: err.message });
+        throw new err.ServerError( err.message );
       }
     });
 };
 
-module.exports.deleteCard = (req, res) =>{
+module.exports.deleteCard = (req, res,next) =>{
   if (mongoose.Types.ObjectId.isValid(req.params.id)) {
     Card.findById(req.params.id)
     .then((card) => {
@@ -54,12 +56,13 @@ module.exports.deleteCard = (req, res) =>{
         .then((card) => res.send({ data: card }))
         .catch((err) => res.status(500).send({ message: err.message }));
       } else {
-        res.status(403).send({ message: 'Can\'t delete other users cards' })
+        throw new err.ForbiddenError('Can\'t delete other users cards');
       }
     })
-    }    else {
+    .catch(next)
+  } else {
       // bad request
-      res.status(400).send({ message: 'Please provide correct id' });
+      throw new err.BadRequest('Please provide correct id')
     }
 }
 
@@ -85,13 +88,13 @@ module.exports.cardExist = (req, res, next) => {
       .then((card) => {
         // if the record was not found, display an error message
         if (!card) {
-          return res.status(404).send({ message: 'record not found' });
+          throw new err.NotFoundError('record not found');
         }
         return next();
       })
-      .catch((err) => res.status(500).send({ message: err }));
+      .catch(next);
   } else {
     // bad request
-    res.status(400).send({ message: 'Please provide correct id' });
+    throw new err.BadRequest( 'Please provide correct id');
   }
 };

@@ -7,9 +7,9 @@ const err = require('../middlewares/errors/errors');
 
 const isValid = (err, res) => {
   if (err.name === 'ValidationError') {
-    return res.status(400).send({ message: err.message });
+    throw new err.BadRequest(err.message);
   }
-  return res.status(500).send({ message: err.message });
+  throw new err.ServerError(err.message);
 };
 
 module.exports.login = (req, res, next) => {
@@ -19,7 +19,6 @@ module.exports.login = (req, res, next) => {
     .select('+password')
     .then((user) => {
       if (!user) {
-        //return res.status(401).send({ message: 'Incorrect email or password' });
         throw new err.NotFoundError('Incorrect email or password');
       }
       // user.password is the hash from the database
