@@ -5,11 +5,11 @@ const { NODE_ENV, JWT_SECRET } = process.env;
 const jwt = require('jsonwebtoken');
 const err = require('../middlewares/errors/errors');
 
-const isValid = (err, res) => {
-  if (err.name === 'ValidationError') {
-    throw new err.BadRequest(err.message);
+const isValid = (error, res) => {
+  if (error.name === 'ValidationError') {
+    return res.status(400).send({ message: error.message });
   }
-  throw new err.ServerError(err.message);
+  return res.status(500).send({ message: error.message });
 };
 
 module.exports.login = (req, res, next) => {
