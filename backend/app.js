@@ -1,4 +1,4 @@
-var cors = require("cors");
+const cors = require("cors");
 require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
@@ -32,6 +32,10 @@ mongoose
 
     app.get("*", (req, res) => {
       res.status(404).send({ message: "Requested resource not found" });
+    });
+
+    app.use((err, req, res, next) => {
+      res.status(err.statusCode).send({ message: err.message });
     });
 
     app.listen(PORT, () => {
