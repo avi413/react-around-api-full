@@ -1,11 +1,10 @@
 const jwt = require('jsonwebtoken');
+
 const { NODE_ENV, JWT_SECRET } = process.env;
 
 module.exports = (req, res, next) => {
-
   // get authorization from the header by destructuring
   const { authorization } = req.headers;
-
   // check that the header exists and starts with 'Bearer '
   if (!authorization || !authorization.startsWith('Bearer ')) {
     return res
@@ -21,12 +20,11 @@ module.exports = (req, res, next) => {
    let payload;
    try {
      payload = jwt.verify(token, NODE_ENV === 'production' ? JWT_SECRET : 'not-so-secret-string');
-
    } catch (err) {
      // otherwise, return an error
      return res
       .status(403)
-      .send({ message: res+'Authorization required' });
+      .send({ message: `${err.message} Authorization required` });
    }
 
    /* Save payload to request. This makes the payload available
@@ -35,5 +33,5 @@ module.exports = (req, res, next) => {
    req.user = payload;
 
    // sending the request to the next middleware
-   next();
+   return next();
 };

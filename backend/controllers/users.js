@@ -1,9 +1,10 @@
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
 const User = require('../models/user');
+const error = require('../middlewares/errors/errors');
+
 const { NODE_ENV, JWT_SECRET } = process.env;
-const jwt = require('jsonwebtoken');
-const err = require('../middlewares/errors/errors');
 
 const isValid = (error, res) => {
   if (error.name === 'ValidationError') {
@@ -19,14 +20,14 @@ module.exports.login = (req, res, next) => {
     .select('+password')
     .then((user) => {
       if (!user) {
-        throw new err.NotFoundError('Incorrect email or password');
+        throw new error.NotFoundError('Incorrect email or password');
       }
       // user.password is the hash from the database
       return bcrypt
         .compare(password, user.password)
         .then((matched) => {
           if (!matched) {
-            throw new err.NotFoundError('Incorrect email or password');
+            throw new error.NotFoundError('Incorrect email or password');
           }
           // successful authentication
           const token = jwt.sign(
@@ -34,7 +35,7 @@ module.exports.login = (req, res, next) => {
             NODE_ENV === 'production' ? JWT_SECRET : 'not-so-secret-string',
             {
               expiresIn: '7d',
-            }
+            },
           );
           res.send({ token });
         })
@@ -62,35 +63,37 @@ module.exports.getUser = (req, res, next) => {
         // return the found data to the user
         .then((user) => {
           if (!Object.keys(user).length) {
-            throw new err.NotFoundError('No result found');
+            throw new error.NotFoundError('No result found');
           }
           res.send({ data: user });
         })
         .catch(next)
     );
   }
-  throw new err.BadRequest('Please provide correct id');
+  throw new error.BadRequest('Please provide correct id');
 };
 
-module.exports.getMe = (req, res, next) => {
-  return (
+module.exports.getMe = (req, res, next) => (
     User.findById(req.user._id)
       // return the found data to the user
       .then((user) => {
         if (!Object.keys(user).length) {
-          throw new err.NotFoundError('No result found');
+          throw new error.NotFoundError('No result found');
         }
         res.send({ data: user });
       })
       .catch(next)
   );
-};
 
 module.exports.createUser = (req, res) => {
-  const { name, about, avatar, email, password } = req.body;
+  const {
+ name, about, avatar, email, password,
+} = req.body;
   bcrypt
     .hash(password, 10)
-    .then((hash) => User.create({ name, about, avatar, email, password: hash }))
+    .then((hash) => User.create({
+ name, about, avatar, email, password: hash,
+}))
     .then((user) => res.send({ data: user }))
     .catch((err) => isValid(err, res));
 };
@@ -100,7 +103,7 @@ module.exports.updateUser = (req, res) => {
   User.findByIdAndUpdate(
     req.params.id,
     { name, about },
-    { runValidators: true, new: true }
+    { runValidators: true, new: true },
   )
     .then((user) => res.send({ data: user }))
     .catch((err) => isValid(err, res));
@@ -111,7 +114,7 @@ module.exports.updateAvatar = (req, res) => {
   User.findByIdAndUpdate(
     req.params.id,
     { avatar },
-    { runValidators: true, new: true }
+    { runValidators: true, new: true },
   )
     .then((user) => res.send({ data: user }))
     .catch((err) => isValid(err, res));

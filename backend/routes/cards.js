@@ -11,17 +11,12 @@ const {
   cardExist,
 } = require('../controllers/cards');
 
-const validateURL = (value, helpers) => {
-  if (validator.isURL(value)) {
-    return value;
-  }
-  return helpers.error('string.uri');
-};
 
 router.get('/', getCards);
 router.get('/:id', getCard);
 
-router.post('/',
+router.post(
+'/',
   celebrate({
     body: Joi.object().keys({
       name: Joi.string().required().min(2).max(30),
@@ -29,7 +24,7 @@ router.post('/',
       owner: Joi.string().required().min(2),
     }),
   }),
-  createCard
+  createCard,
 );
 
 router.delete('/:id', cardExist, deleteCard);

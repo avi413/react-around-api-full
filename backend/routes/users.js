@@ -3,11 +3,9 @@ const {
   getMe,
   getUser,
   getUsers,
-  createUser,
   updateUser,
   updateAvatar,
 } = require('../controllers/users');
-
 
 router.get('/me', getMe);
 router.get('/', getUsers);
