@@ -4,11 +4,12 @@ const express = require('express');
 const mongoose = require('mongoose');
 const helmet = require('helmet');
 const bodyParser = require('body-parser');
-const { celebrate, Joi, errors } = require('celebrate');
+const { errors } = require('celebrate');
 const { NotFoundError } = require('./middlewares/errors/errors')
+const usersAouth = require('./routes/usersAouth');
 const cards = require('./routes/cards');
 const users = require('./routes/users');
-const { createUser, login } = require('./controllers/users');
+
 const auth = require('./middlewares/auth');
 const { requestLogger } = require('./middlewares/logger');
 
@@ -30,33 +31,7 @@ mongoose
 
     app.use(requestLogger);
 
-    app.post(
-      '/signin',
-      celebrate({
-        body: Joi.object().keys({
-          email: Joi.string().email({
-            minDomainSegments: 2,
-            tlds: { allow: ['com', 'net'] },
-          }),
-          password: Joi.string().required().min(2),
-        }),
-      }),
-      login,
-    );
-    app.post(
-      '/signup',
-      celebrate({
-        body: Joi.object().keys({
-          email: Joi.string().email({
-            minDomainSegments: 2,
-            tlds: { allow: ['com', 'net'] },
-          }),
-          password: Joi.string().required().min(2),
-        }),
-      }),
-      createUser,
-    );
-
+    app.use('/', usersAouth);
     app.use('/users', auth, users);
     app.use('/cards', auth, cards);
 
