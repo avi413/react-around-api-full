@@ -20,6 +20,16 @@ All other directories are optional and may be created by the developer if necess
   
 `npm run dev` — to launch the server with the hot reload feature.  
 
+## Demo
+
+[Click me to go to around-react app!](https://avi.students.nomoreparties.sbs/)
+
+
+
+## Authors
+
+- [@avidalal](https://www.github.com/avi413)
+
 
 
 
