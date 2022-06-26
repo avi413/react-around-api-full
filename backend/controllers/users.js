@@ -74,11 +74,12 @@ module.exports.getUser = (req, res, next) => {
 };
 
 module.exports.getMe = (req, res, next) => (
+
     User.findById(req.user._id)
       // return the found data to the user
       .then((user) => {
         if (!Object.keys(user).length) {
-          throw new error.NotFoundError('No result found');
+        throw new error.NotFoundError('No result found');
         }
         res.send({ data: user });
       })

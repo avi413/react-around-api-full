@@ -6,7 +6,9 @@ module.exports = (req, res, next) => {
   // get authorization from the header by destructuring
   const { authorization } = req.headers;
   // check that the header exists and starts with 'Bearer '
+
   if (!authorization || !authorization.startsWith('Bearer ')) {
+
     return res
       .status(403)
       .send({ message: 'Authorization required' });

@@ -5,7 +5,7 @@ const mongoose = require('mongoose');
 const helmet = require('helmet');
 const bodyParser = require('body-parser');
 const { celebrate, Joi, errors } = require('celebrate');
-
+const { NotFoundError } = require('./middlewares/errors/errors')
 const cards = require('./routes/cards');
 const users = require('./routes/users');
 const { createUser, login } = require('./controllers/users');
@@ -61,17 +61,24 @@ mongoose
     app.use('/cards', auth, cards);
 
     app.get('*', (req, res) => {
-      res.status(404).send({ message: 'Requested resource not found' });
+     throw new NotFoundError('Requested resource not found' );
     });
+
     app.post('*', (req, res) => {
-      res.status(404).send({ message: 'Requested resource not found' });
+      throw new NotFoundError('Requested resource not found' );
     });
 
     // error handlers
     app.use(errors()); // celebrate error handler
 
     app.use((err, req, res, next) => {
-      res.status(err.statusCode).send({ message: err.message });
+      const { statusCode = 500, message } = err;
+      res.status(statusCode).send({
+        // check the status and display a message based on it
+        message: statusCode === 500
+          ? 'An error occurred on the server'
+          : message
+      });
     });
 
     app.listen(PORT, () => {
