@@ -1,5 +1,6 @@
 const router = require('express').Router(); // creating a router
 const { celebrate, Joi } = require('celebrate');
+const { NotFoundError } = require('../middlewares/errors/errors');
 
 const {
   getCards,
@@ -15,6 +16,10 @@ const {
 router.get('/', getCards);
 router.get('/:id', getCard);
 
+router.get('*', (req, res) => {
+  throw new NotFoundError('Requested resource not found' );
+ });
+
 router.post(
 '/',
   celebrate({
@@ -27,8 +32,21 @@ router.post(
   createCard,
 );
 
+router.post('*', (req, res) => {
+  throw new NotFoundError('Requested resource not found' );
+ });
+
 router.delete('/:id', cardExist, deleteCard);
-router.put('/:id/likes', cardExist, likeCard);
 router.delete('/:id/likes', cardExist, dislikeCard);
+
+router.delete('*', (req, res) => {
+  throw new NotFoundError('Requested resource not found' );
+ });
+
+router.put('/:id/likes', cardExist, likeCard);
+
+router.put('*', (req, res) => {
+  throw new NotFoundError('Requested resource not found' );
+ });
 
 module.exports = router; // exporting the router
