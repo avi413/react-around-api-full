@@ -5,7 +5,8 @@ const mongoose = require('mongoose');
 const helmet = require('helmet');
 const bodyParser = require('body-parser');
 const { errors } = require('celebrate');
-const { NotFoundError } = require('./middlewares/errors/errors')
+const { NotFoundError } = require('./middlewares/errors/errors');
+const { limiter  } = require('./middlewares/limiter');
 const usersAouth = require('./routes/usersAouth');
 const cards = require('./routes/cards');
 const users = require('./routes/users');
@@ -28,7 +29,7 @@ mongoose
     app.use(helmet());
 
     app.use(cors());
-
+    app.use(limiter);
     app.use(requestLogger);
 
     app.use('/', usersAouth);
@@ -50,7 +51,7 @@ mongoose
       const { statusCode = 500, message } = err;
       res.status(statusCode).send({
         // check the status and display a message based on it
-        message: statusCode === 500
+        message: statusCode === 500 && !message
           ? 'An error occurred on the server'
           : message
       });
