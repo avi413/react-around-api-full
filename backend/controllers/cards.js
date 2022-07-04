@@ -21,7 +21,6 @@ module.exports.getCard = (req, res, next) => {
       .then((card) => {
         // if the record was not found, display an error message
         if (!card) throw new error.NotFoundError('No result found');
-        // return the found data to the card
         return res.send({ data: card });
       })
       .catch(next);
