@@ -43,7 +43,6 @@ module.exports.createCard = (req, res) => {
       }
     });
 };
-
 module.exports.deleteCard = (req, res, next) => {
   if (mongoose.Types.ObjectId.isValid(req.params.id)) {
     Card.findById(req.params.id)
